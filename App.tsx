@@ -1,7 +1,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import React from "react";
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import LoginScreen from "./screens/LoginScreen";
@@ -21,7 +21,9 @@ export default function App() {
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName="SplashScreen"
+          initialRouteName={
+            Platform.OS === "android" ? "SplashScreen" : "Login"
+          }
           // screenOptions={globalScreenOptions}
         >
           <Stack.Screen
@@ -35,14 +37,14 @@ export default function App() {
             name="Login"
             component={LoginScreen}
             options={{
-              headerTitleAlign: "center",
+              headerShown: false,
             }}
           />
           <Stack.Screen
             name="Register"
             component={RegisterScreen}
             options={{
-              headerTitleAlign: "center",
+              headerShown: false,
             }}
           />
         </Stack.Navigator>
