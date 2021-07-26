@@ -38,6 +38,7 @@
     "react-native-screens": "~3.4.0",
     "react-native-svg": "12.1.1",
     "react-native-unimodules": "~0.14.5",
+    "react-native-use-modal": "^0.5.0",
     "react-native-web": "~0.13.12",
     "stream-chat-expo": "^3.6.7"
   },

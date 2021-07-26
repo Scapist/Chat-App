@@ -7,10 +7,19 @@ import {
   View,
 } from "react-native";
 import { Icon } from "react-native-elements";
+import { useAlertModal } from "./useAlertModal";
 
-const LoginScreen = () => {
+const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const alertModal = useAlertModal();
+
+  const openForgotPasswordOverlay = async () => {
+    await alertModal.show({
+      title: "Forgot Password?",
+      message: "Relax! Try to remember.",
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -52,7 +61,9 @@ const LoginScreen = () => {
         />
       </View>
       <TouchableOpacity>
-        <Text style={styles.forgot}>Forgot Password?</Text>
+        <Text style={styles.forgot} onPress={openForgotPasswordOverlay}>
+          Forgot Password?
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.loginBtn}>
         <Text style={styles.loginText}>
@@ -65,11 +76,15 @@ const LoginScreen = () => {
           />
         </Text>
       </TouchableOpacity>
-
       <View style={styles.noAccountContainer}>
         <Text style={styles.noAccountText}>Don't have an account yet?</Text>
         <TouchableOpacity style={{ paddingBottom: 0 }}>
-          <Text style={styles.signUp}> Sign up</Text>
+          <Text
+            style={styles.signUp}
+            onPress={() => navigation.navigate("Register")}
+          >
+            Sign up
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -105,11 +120,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  focusedInputView: {
-    borderWidth: 2,
-    borderStyle: "solid",
-    borderColor: "#85089e",
-  },
+  // focusedInputView: {
+  //   borderWidth: 2,
+  //   borderStyle: "solid",
+  //   borderColor: "#85089e",
+  // },
   inputIcon: {
     padding: 10,
   },
