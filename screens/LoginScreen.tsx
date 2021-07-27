@@ -1,18 +1,43 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  KeyboardAvoidingView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { Icon } from "react-native-elements";
-import { useAlertModal } from "./useAlertModal";
+import { Icon, Image } from "react-native-elements";
+import { useAlertModal } from "../components/useAlertModal";
+import { auth } from "../firebase";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const alertModal = useAlertModal();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        navigation.replace("Home");
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const signIn = () => {
+    auth
+      .signInWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        // Signed in
+        var user = userCredential.user;
+        console.log(user);
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
+  };
 
   const openForgotPasswordOverlay = async () => {
     await alertModal.show({
@@ -22,9 +47,13 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.loginHeaderText}>Login</Text>
-      <Text style={styles.loginSubText}>Please sign in to continue</Text>
+    <KeyboardAvoidingView enabled behavior="padding" style={styles.container}>
+      <Image
+        source={require("../assets/logo.png")}
+        style={{ width: 200, height: 200 }}
+      />
+      <Text style={styles.headerText}>Login</Text>
+      <Text style={styles.headerSubText}>Please sign in to continue</Text>
       <View style={styles.inputView}>
         <Icon
           style={styles.inputIcon}
@@ -65,8 +94,8 @@ const LoginScreen = ({ navigation }) => {
           Forgot Password?
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.loginBtn}>
-        <Text style={styles.loginText}>
+      <TouchableOpacity style={styles.submitBtn}>
+        <Text style={styles.submitBtnText} onPress={signIn}>
           LOGIN{" "}
           <Icon
             type="font-awesome"
@@ -77,7 +106,7 @@ const LoginScreen = ({ navigation }) => {
         </Text>
       </TouchableOpacity>
       <View style={styles.noAccountContainer}>
-        <Text style={styles.noAccountText}>Don't have an account yet?</Text>
+        <Text style={styles.noAccountText}>Don't have an account yet? </Text>
         <TouchableOpacity style={{ paddingBottom: 0 }}>
           <Text
             style={styles.signUp}
@@ -87,23 +116,23 @@ const LoginScreen = ({ navigation }) => {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000000",
+    backgroundColor: "black",
     alignItems: "center",
     justifyContent: "center",
   },
-  loginHeaderText: {
+  headerText: {
     fontFamily: "serif",
     color: "white",
     fontSize: 40,
   },
-  loginSubText: {
+  headerSubText: {
     fontFamily: "serif",
     color: "#3d3d3b",
     fontSize: 20,
@@ -120,11 +149,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  // focusedInputView: {
-  //   borderWidth: 2,
-  //   borderStyle: "solid",
-  //   borderColor: "#85089e",
-  // },
   inputIcon: {
     padding: 10,
   },
@@ -145,7 +169,7 @@ const styles = StyleSheet.create({
     fontFamily: "serif",
     fontSize: 14,
   },
-  loginBtn: {
+  submitBtn: {
     width: "50%",
     backgroundColor: "#85089e",
     borderRadius: 25,
@@ -155,7 +179,7 @@ const styles = StyleSheet.create({
     marginTop: 40,
     marginBottom: 10,
   },
-  loginText: {
+  submitBtnText: {
     color: "white",
     fontFamily: "serif",
     fontSize: 16,
@@ -167,6 +191,7 @@ const styles = StyleSheet.create({
 
     position: "absolute",
     bottom: 30,
+    paddingTop: 15,
   },
   noAccountText: {
     color: "white",

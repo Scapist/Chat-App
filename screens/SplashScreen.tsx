@@ -4,6 +4,7 @@ import LottieView from "lottie-react-native";
 import React, { useEffect, useRef } from "react";
 import { View } from "react-native";
 import "react-native-gesture-handler";
+import { auth } from "../firebase";
 
 type RootStackParamList = {
   SplashScreen: undefined;
@@ -27,7 +28,7 @@ const SplashScreen = ({ navigation }: Props) => {
   });
 
   const onSplashEnd = () => {
-    navigation.replace("Login");
+    navigation.replace(auth.currentUser ? "Home" : "Login");
   };
 
   return (

@@ -7,9 +7,12 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@cometchat-pro/react-native-chat": "^2.4.0",
     "@expo-google-fonts/anton": "^0.2.0",
+    "@react-native-async-storage/async-storage": "^1.15.5",
     "@react-native-community/masked-view": "0.1.10",
     "@react-native-community/netinfo": "6.0.0",
+    "@react-navigation/bottom-tabs": "^5.11.11",
     "@react-navigation/native": "^5.9.4",
     "@react-navigation/stack": "^5.14.5",
     "expo": "~42.0.1",
@@ -26,6 +29,7 @@
     "expo-splash-screen": "~0.11.2",
     "expo-status-bar": "~1.0.4",
     "expo-updates": "~0.8.1",
+    "firebase": "8.2.3",
     "lottie-ios": "^3.2.3",
     "lottie-react-native": "^4.0.3",
     "react": "16.13.1",
@@ -39,8 +43,7 @@
     "react-native-svg": "12.1.1",
     "react-native-unimodules": "~0.14.5",
     "react-native-use-modal": "^0.5.0",
-    "react-native-web": "~0.13.12",
-    "stream-chat-expo": "^3.6.7"
+    "react-native-web": "~0.13.12"
   },
   "devDependencies": {
     "@babel/core": "^7.9.0",

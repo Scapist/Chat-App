@@ -5,17 +5,23 @@ import { createUseModal } from "react-native-use-modal";
 export const useAlertModal = createUseModal<
   void,
   { title: string; message: string }
->(({ confirm, param }) => {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.titleText}>{param.title}</Text>
-      <Text style={styles.messageText}>{param.message}</Text>
-      <TouchableOpacity style={styles.confirmButton} onPress={confirm}>
-        <Text style={styles.confirmButtonText}>OK</Text>
-      </TouchableOpacity>
-    </View>
-  );
-});
+>(
+  ({ confirm, param }) => {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.titleText}>{param.title}</Text>
+        <Text style={styles.messageText}>{param.message}</Text>
+        <TouchableOpacity style={styles.confirmButton} onPress={confirm}>
+          <Text style={styles.confirmButtonText}>OK</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  },
+  {
+    cancelOnBackButtonPress: true,
+    cancelOnBackdropPress: true,
+  }
+);
 
 const styles = StyleSheet.create({
   container: {
