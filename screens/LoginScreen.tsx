@@ -1,3 +1,4 @@
+import { CometChat } from "@cometchat-pro/react-native-chat";
 import React, { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -7,8 +8,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Icon, Image } from "react-native-elements";
+import { Button, Icon, Image } from "react-native-elements";
 import { useAlertModal } from "../components/useAlertModal";
+import { COMETCHAT_CONSTANTS } from "../constants";
 import { auth } from "../firebase";
 
 const LoginScreen = ({ navigation }) => {
@@ -31,8 +33,19 @@ const LoginScreen = ({ navigation }) => {
       .signInWithEmailAndPassword(email, password)
       .then((userCredential) => {
         // Signed in
-        var user = userCredential.user;
-        console.log(user);
+        const user = userCredential.user;
+        if (user) {
+          CometChat.login(user.uid, COMETCHAT_CONSTANTS.AUTH_KEY).then(
+            (loggedUser) => {
+              console.log("Login Successful:", { loggedUser });
+              // User loged in successfully.
+            },
+            (error) => {
+              console.log("Login failed with exception:", { error });
+              // User login failed, check error and take appropriate action.
+            }
+          );
+        }
       })
       .catch((error) => {
         alert(error.message);
@@ -86,7 +99,7 @@ const LoginScreen = ({ navigation }) => {
           placeholderTextColor="white"
           value={password}
           onChangeText={setPassword}
-          // onSubmitEditing={signIn}
+          onSubmitEditing={signIn}
         />
       </View>
       <TouchableOpacity>
@@ -94,17 +107,23 @@ const LoginScreen = ({ navigation }) => {
           Forgot Password?
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.submitBtn}>
-        <Text style={styles.submitBtnText} onPress={signIn}>
-          LOGIN{" "}
+      {/* <TouchableOpacity style={styles.submitBtn}> */}
+      <Button
+        buttonStyle={styles.submitBtn}
+        containerStyle={styles.submitBtnContainer}
+        title="Log In "
+        onPress={signIn}
+        iconRight
+        icon={
           <Icon
             type="font-awesome"
             name="long-arrow-right"
             color="white"
             size={16}
           />
-        </Text>
-      </TouchableOpacity>
+        }
+      />
+      {/* </TouchableOpacity> */}
       <View style={styles.noAccountContainer}>
         <Text style={styles.noAccountText}>Don't have an account yet? </Text>
         <TouchableOpacity style={{ paddingBottom: 0 }}>
@@ -170,19 +189,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   submitBtn: {
-    width: "50%",
     backgroundColor: "#85089e",
     borderRadius: 25,
-    height: 50,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 40,
-    marginBottom: 10,
   },
-  submitBtnText: {
-    color: "white",
-    fontFamily: "serif",
-    fontSize: 16,
+  submitBtnContainer: {
+    paddingTop: 20,
+    width: "50%",
   },
   noAccountContainer: {
     flexDirection: "row",

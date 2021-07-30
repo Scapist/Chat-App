@@ -7,6 +7,7 @@ import {
   Text,
   View,
 } from "react-native";
+import ChatListItem from "../components/ChatListItem";
 
 const ChatsScreen = () => {
   return (
@@ -20,6 +21,7 @@ const ChatsScreen = () => {
             <Text style={styles.conversationHeaderTitleStyle}>Chats</Text>
           </View>
         </View>
+        <ChatListItem />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

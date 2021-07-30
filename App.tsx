@@ -2,7 +2,12 @@ import { CometChat } from "@cometchat-pro/react-native-chat";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import React, { useEffect, useState } from "react";
-import { Platform, StatusBar, StyleSheet } from "react-native";
+import {
+  PermissionsAndroid,
+  Platform,
+  StatusBar,
+  StyleSheet,
+} from "react-native";
 import "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ModalProvider } from "react-native-use-modal";
@@ -23,23 +28,45 @@ const globalScreenOptions = {
 };
 
 export default function App() {
+  const [initialRoute, setInitialRoute] = useState("");
+
   const appSetting = new CometChat.AppSettingsBuilder()
     .subscribePresenceForAllUsers()
     .setRegion(COMETCHAT_CONSTANTS.APP_REGION)
     .build();
 
-  CometChat.init(COMETCHAT_CONSTANTS.APP_ID, appSetting).then(
-    () => {
-      console.log("Initialization completed successfully");
-      // You can now call login function.
-    },
-    (error) => {
-      console.log("Initialization failed with error:", error);
-      // Check the reason for error and take appropriate action.
-    }
-  );
+  useEffect(() => {
+    CometChat.init(COMETCHAT_CONSTANTS.APP_ID, appSetting).then(
+      () => {
+        console.log("Initialization completed successfully");
+        // You can now call login function.
+      },
+      (error) => {
+        console.log("Initialization failed with error:", error);
+        // Check the reason for error and take appropriate action.
+      }
+    );
 
-  const [initialRoute, setInitialRoute] = useState("");
+    const getPermissions = async () => {
+      console.log("hello");
+      if (Platform.OS === "android") {
+        let granted = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          // PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        ]);
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          granted = await PermissionsAndroid.requestMultiple([
+            PermissionsAndroid.PERMISSIONS.CAMERA,
+            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+            // PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          ]);
+        }
+      }
+    };
+
+    getPermissions();
+  }, []);
 
   useEffect(() => {
     setInitialRoute(auth.currentUser ? "Home" : "Login");
@@ -51,7 +78,7 @@ export default function App() {
         <NavigationContainer>
           <Stack.Navigator
             initialRouteName={
-              Platform.OS === "android" ? "SplashScreen" : initialRoute
+              Platform.OS === "web" ? initialRoute : "SplashScreen"
             }
             screenOptions={globalScreenOptions}
           >
