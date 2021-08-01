@@ -25,7 +25,7 @@ const SplashScreen = ({ navigation }: Props) => {
 
   useEffect(() => {
     if (animation.current) animation.current.play(51, 178);
-  });
+  }, []);
 
   const onSplashEnd = () => {
     navigation.replace(auth.currentUser ? "Home" : "Login");

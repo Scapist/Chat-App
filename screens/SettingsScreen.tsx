@@ -5,35 +5,26 @@ import { StyleSheet, Text, View } from "react-native";
 import { Avatar, Button } from "react-native-elements";
 import uuid from "react-native-uuid";
 import Icon from "react-native-vector-icons/FontAwesome";
-import { COMETCHAT_CONSTANTS } from "../constants";
+import ProfilePicture from "../components/ProfilePicture";
 import { auth, storage } from "../firebase";
 
-const SettingsScreen = ({ navigation }) => {
-  const [user, setUser] = useState<CometChat.User>();
+type SettingsScreenProps = {
+  navigation: any;
+  user: CometChat.User;
+};
+
+const SettingsScreen = ({ navigation, user }: SettingsScreenProps) => {
   const [uploading, setUploading] = useState<boolean>(false);
   const [imageUploadUrl, setImageUploadUrl] = useState<string>("");
 
   useEffect(() => {
-    CometChat.getLoggedinUser().then(
-      (loggedInUser) => {
-        if (loggedInUser) {
-          setUser(loggedInUser);
-          console.log(loggedInUser);
-        }
-      },
-      (error) => {
-        console.log("error getting details:", { error });
-      }
-    );
-  }, []);
-
-  useEffect(() => {
-    if (user) {
+    if (user && imageUploadUrl !== user.getAvatar()) {
       user.setAvatar(imageUploadUrl);
 
       CometChat.updateCurrentUserDetails(user).then(
         (updatedUser) => {
-          console.log("user updated", updatedUser);
+          // console.log("user updated", updatedUser);
+          console.log("user updated");
         },
         (error) => {
           console.log("error", error);
@@ -123,27 +114,24 @@ const SettingsScreen = ({ navigation }) => {
       });
   };
 
-  const getImage = () => {
-    return user && user.getAvatar()
-      ? { uri: user.getAvatar() }
-      : require("../assets/blank_profile_picture.png");
-  };
-
   const getName = () => {
+    if (user) {
+      console.log("found", user);
+    }
     return user ? user.getName() : "";
   };
 
   return (
     <View style={styles.container}>
-      <Avatar rounded source={getImage()} size="xlarge">
+      <View>
+        <ProfilePicture user={user} size={200} />
         <Avatar.Accessory
-          // containerStyle={{ borderRadius: 2, borderColor: "white" }}
           name="pencil"
           type="font-awesome"
           size={25}
           onPress={changeProfilePicture}
         />
-      </Avatar>
+      </View>
       <Text style={styles.usernameStyle}>{getName()}</Text>
       <Button
         buttonStyle={styles.submitBtn}
@@ -167,6 +155,7 @@ const styles = StyleSheet.create({
   submitBtn: {
     backgroundColor: "#85089e",
     borderRadius: 25,
+    fontFamily: "serif",
   },
   submitBtnContainer: {
     paddingTop: 20,

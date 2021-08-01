@@ -29,6 +29,7 @@ const globalScreenOptions = {
 
 export default function App() {
   const [initialRoute, setInitialRoute] = useState("");
+  const [user, setUser] = useState<CometChat.User>();
 
   const appSetting = new CometChat.AppSettingsBuilder()
     .subscribePresenceForAllUsers()
@@ -72,6 +73,25 @@ export default function App() {
     setInitialRoute(auth.currentUser ? "Home" : "Login");
   }, [auth.currentUser]);
 
+  useEffect(() => {
+    CometChat.getLoggedinUser().then(
+      (loggedInUser) => {
+        if (loggedInUser && user !== loggedInUser) {
+          setUser(loggedInUser);
+          console.log("loggedUser with useEffect", loggedInUser);
+        }
+      },
+      (error) => {
+        console.log("error getting details:", { error });
+      }
+    );
+  }, []);
+
+  const setLoggedUser = (loggedUser: CometChat.User) => {
+    setUser(loggedUser);
+    console.log("loggedUser", user);
+  };
+
   return (
     <ModalProvider>
       <SafeAreaProvider>
@@ -83,9 +103,19 @@ export default function App() {
             screenOptions={globalScreenOptions}
           >
             <Stack.Screen name="SplashScreen" component={SplashScreen} />
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Login">
+              {(props) => (
+                <LoginScreen {...props} setLoggedUser={setLoggedUser} />
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="Register">
+              {(props) => (
+                <RegisterScreen {...props} setUserCallback={setLoggedUser} />
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="Home">
+              {(props) => <HomeScreen {...props} user={user} />}
+            </Stack.Screen>
           </Stack.Navigator>
         </NavigationContainer>
         <StatusBar style="light" />

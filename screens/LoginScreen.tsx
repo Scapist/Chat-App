@@ -13,7 +13,12 @@ import { useAlertModal } from "../components/useAlertModal";
 import { COMETCHAT_CONSTANTS } from "../constants";
 import { auth } from "../firebase";
 
-const LoginScreen = ({ navigation }) => {
+type LoginScreenProps = {
+  navigation: any;
+  setLoggedUser: any;
+};
+
+const LoginScreen = ({ navigation, setLoggedUser }: LoginScreenProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const alertModal = useAlertModal();
@@ -39,6 +44,7 @@ const LoginScreen = ({ navigation }) => {
             (loggedUser) => {
               console.log("Login Successful:", { loggedUser });
               // User loged in successfully.
+              setLoggedUser(loggedUser);
             },
             (error) => {
               console.log("Login failed with exception:", { error });

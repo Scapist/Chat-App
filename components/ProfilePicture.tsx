@@ -5,11 +5,10 @@ import { Image } from "react-native-elements";
 
 type ProfilePictureProps = {
   user: CometChat.User;
-  width: number;
-  height: number;
+  size: number;
 };
 
-const ProfilePicture = ({ user, width, height }: ProfilePictureProps) => {
+const ProfilePicture = ({ user, size }: ProfilePictureProps) => {
   const getImage = () => {
     return user && user.getAvatar()
       ? { uri: user.getAvatar() }
@@ -18,7 +17,16 @@ const ProfilePicture = ({ user, width, height }: ProfilePictureProps) => {
 
   return (
     <View>
-      <Image source={getImage()} style={{ width, height, borderRadius: 100 }} />
+      <Image
+        source={getImage()}
+        style={{
+          width: size,
+          height: size,
+          borderRadius: 100,
+          borderColor: "#85089e",
+          borderWidth: 1,
+        }}
+      />
     </View>
   );
 };

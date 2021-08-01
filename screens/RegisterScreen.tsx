@@ -12,7 +12,15 @@ import { Button, Icon, Image } from "react-native-elements";
 import { COMETCHAT_CONSTANTS } from "../constants";
 import { auth } from "../firebase";
 
-const RegisterScreen = ({ navigation, setUserCallback }) => {
+type RegisterScreenProps = {
+  navigation: any;
+  setUserCallback: any;
+};
+
+const RegisterScreen = ({
+  navigation,
+  setUserCallback,
+}: RegisterScreenProps) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

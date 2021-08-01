@@ -8,7 +8,7 @@ const ChatListItem = () => {
 
   return (
     <View>
-      <ProfilePicture />
+      {/* <ProfilePicture /> */}
       <Text style={styles.textStyle}>Chat name</Text>
       <Text style={styles.textStyle}>lastMessage</Text>
       <Text style={styles.textStyle}>timestamp</Text>
