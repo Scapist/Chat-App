@@ -1,9 +1,11 @@
 import { CometChat } from "@cometchat-pro/react-native-chat";
 import { Ionicons } from "@expo/vector-icons";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import AddFriendsScreen from "./AddFriendsScreen";
 import FriendsScreen from "./FriendsScreen";
+
+const SEARCH_LIMIT = 30;
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -12,6 +14,68 @@ type PeopleScreenProps = {
 };
 
 const PeopleScreen = ({ user }: PeopleScreenProps) => {
+  const [allUsersList, setAllUsersList] = useState<CometChat.User[]>();
+  const [friendsList, setFriendsList] = useState<CometChat.User[]>();
+  const [nonFriendsList, setNonFriendsList] = useState<CometChat.User[]>();
+
+  useEffect(() => {
+    fetchAllUsers();
+  }, []);
+
+  const forceUpdate = () => {
+    fetchAllUsers();
+  };
+
+  useEffect(() => {
+    fetchFriendsList();
+  }, [allUsersList]);
+
+  useEffect(() => {
+    if (friendsList !== undefined && allUsersList !== undefined) {
+      const nonFriends = allUsersList.filter((el) => {
+        return !friendsList.find((friend) => friend.getUid() === el.getUid());
+      });
+      setNonFriendsList(nonFriends);
+    }
+  }, [friendsList]);
+
+  const fetchAllUsers = () => {
+    const allUsersRequest = new CometChat.UsersRequestBuilder()
+      .setLimit(SEARCH_LIMIT)
+      .build();
+
+    allUsersRequest.fetchNext().then(
+      (userList) => {
+        /* userList will be the list of User class. */
+        // console.log("User list received:", userList);
+        /* retrived list can be used to display contact list. */
+        setAllUsersList(userList);
+      },
+      (error) => {
+        console.log("User list fetching failed with error:", error);
+      }
+    );
+  };
+
+  const fetchFriendsList = () => {
+    const friendsListRequest = new CometChat.UsersRequestBuilder()
+      .setLimit(SEARCH_LIMIT)
+      .friendsOnly(true)
+      .build();
+
+    friendsListRequest.fetchNext().then(
+      (userList) => {
+        /* userList will be the list of User class. */
+        // console.log("User list received:", userList);
+        /* retrived list can be used to display contact list. */
+        setFriendsList(userList);
+      },
+      (error) => {
+        console.log("User list fetching failed with error:", error);
+      }
+    );
+  };
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -43,13 +107,25 @@ const PeopleScreen = ({ user }: PeopleScreenProps) => {
         },
       }}
     >
-      <Tab.Screen
-        name="Friends"
-        options={{ tabBarLabel: "Friends" }}
-        component={FriendsScreen}
-      />
+      <Tab.Screen name="Friends" options={{ tabBarLabel: "Friends" }}>
+        {(props) => (
+          <FriendsScreen
+            {...props}
+            user={user}
+            friendsList={friendsList}
+            forceUpdate={forceUpdate}
+          />
+        )}
+      </Tab.Screen>
       <Tab.Screen name="AddFriends" options={{ tabBarLabel: "Add Friends" }}>
-        {(props) => <AddFriendsScreen {...props} user={user} />}
+        {(props) => (
+          <AddFriendsScreen
+            {...props}
+            user={user}
+            nonFriendsList={nonFriendsList}
+            forceUpdate={forceUpdate}
+          />
+        )}
       </Tab.Screen>
     </Tab.Navigator>
   );

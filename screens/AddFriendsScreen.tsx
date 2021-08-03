@@ -1,45 +1,24 @@
 import { CometChat } from "@cometchat-pro/react-native-chat";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import React from "react";
+import { StyleSheet, View } from "react-native";
 import UserList from "../components/UserList";
 import { COMETCHAT_CONSTANTS } from "../constants";
-
-const SEARCH_LIMIT = 30;
 
 type UsersScreenProps = {
   navigation: any;
   user: CometChat.User;
+  nonFriendsList: CometChat.User[];
+  forceUpdate: any;
 };
-const UsersScreen = ({ user }: UsersScreenProps) => {
-  const [users, setUsers] = useState<CometChat.User[]>();
 
-  useEffect(() => {
-    console.log("here", user);
-  }, []);
-
-  useEffect(() => {
-    const usersRequest = new CometChat.UsersRequestBuilder()
-      .setLimit(SEARCH_LIMIT)
-      .build();
-
-    usersRequest.fetchNext().then(
-      (userList) => {
-        /* userList will be the list of User class. */
-        console.log("User list received:", userList);
-        /* retrived list can be used to display contact list. */
-        setUsers(userList);
-      },
-      (error) => {
-        console.log("User list fetching failed with error:", error);
-      }
-    );
-  }, []);
-
+const UsersScreen = ({
+  user,
+  nonFriendsList,
+  forceUpdate,
+}: UsersScreenProps) => {
   const addFriend = (friend: CometChat.User) => {
-    console.log(user);
     if (user) {
-      console.log(friend);
       const url = `https://api-us.cometchat.io/v2.0/users/${user.getUid()}/friends`;
       const headers = {
         appId: COMETCHAT_CONSTANTS.APP_ID,
@@ -48,7 +27,7 @@ const UsersScreen = ({ user }: UsersScreenProps) => {
 
       axios.post(url, { accepted: [friend.getUid()] }, { headers }).then(
         (response) => {
-          console.log("friend added", response);
+          forceUpdate();
         },
         (error) => {
           console.log(error);
@@ -59,7 +38,7 @@ const UsersScreen = ({ user }: UsersScreenProps) => {
 
   return (
     <View style={styles.container}>
-      <UserList users={users} addFriend={addFriend} />
+      <UserList users={nonFriendsList} addFriend={addFriend} />
     </View>
   );
 };

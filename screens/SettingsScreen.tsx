@@ -18,13 +18,12 @@ const SettingsScreen = ({ navigation, user }: SettingsScreenProps) => {
   const [imageUploadUrl, setImageUploadUrl] = useState<string>("");
 
   useEffect(() => {
-    if (user && imageUploadUrl !== user.getAvatar()) {
+    if (user && imageUploadUrl !== "" && imageUploadUrl !== user.getAvatar()) {
       user.setAvatar(imageUploadUrl);
 
       CometChat.updateCurrentUserDetails(user).then(
         (updatedUser) => {
           // console.log("user updated", updatedUser);
-          console.log("user updated");
         },
         (error) => {
           console.log("error", error);
@@ -40,8 +39,6 @@ const SettingsScreen = ({ navigation, user }: SettingsScreenProps) => {
       aspect: [4, 3],
       quality: 1,
     });
-
-    console.log(result);
 
     handleImagePicked(result);
   };
@@ -115,9 +112,6 @@ const SettingsScreen = ({ navigation, user }: SettingsScreenProps) => {
   };
 
   const getName = () => {
-    if (user) {
-      console.log("found", user);
-    }
     return user ? user.getName() : "";
   };
 

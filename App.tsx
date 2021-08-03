@@ -49,7 +49,6 @@ export default function App() {
     );
 
     const getPermissions = async () => {
-      console.log("hello");
       if (Platform.OS === "android") {
         let granted = await PermissionsAndroid.requestMultiple([
           PermissionsAndroid.PERMISSIONS.CAMERA,
@@ -78,7 +77,6 @@ export default function App() {
       (loggedInUser) => {
         if (loggedInUser && user !== loggedInUser) {
           setUser(loggedInUser);
-          console.log("loggedUser with useEffect", loggedInUser);
         }
       },
       (error) => {
@@ -89,7 +87,6 @@ export default function App() {
 
   const setLoggedUser = (loggedUser: CometChat.User) => {
     setUser(loggedUser);
-    console.log("loggedUser", user);
   };
 
   return (
