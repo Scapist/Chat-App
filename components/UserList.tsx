@@ -1,5 +1,5 @@
 import { CometChat } from "@cometchat-pro/react-native-chat";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Button } from "react-native-elements";
+import { Button, SearchBar } from "react-native-elements";
 import Icon from "react-native-vector-icons/FontAwesome";
 import ProfilePicture from "./ProfilePicture";
 
@@ -17,11 +17,31 @@ type UserListProps = {
 };
 
 const UserList = ({ users, addFriend }: UserListProps) => {
+  const [search, setSearch] = useState<string>("");
+  const [dataList, setDataList] = useState<CometChat.User[]>();
+
+  useEffect(() => {
+    setDataList([...users]);
+  }, [users]);
+
+  useEffect(() => {
+    setDataList(users.filter((el) => el.getName().includes(search)));
+  }, [search]);
+
+  const updateSearch = (value: string) => {
+    setSearch(value);
+  };
+
   return (
     <View style={styles.container}>
+      <SearchBar
+        placeholder="Type Here..."
+        onChangeText={updateSearch}
+        value={search}
+      />
       <View style={styles.body}>
         <FlatList
-          data={users}
+          data={dataList}
           keyExtractor={(item: CometChat.User) => {
             return item.getUid();
           }}
@@ -37,6 +57,7 @@ const UserList = ({ users, addFriend }: UserListProps) => {
                     title="Add Friend "
                     onPress={() => {
                       addFriend(item);
+                      setSearch("");
                     }}
                     iconRight
                     icon={<Icon name="plus-circle" color="white" size={16} />}
