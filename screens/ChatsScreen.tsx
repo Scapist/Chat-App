@@ -1,4 +1,5 @@
-import React from "react";
+import { CometChat } from "@cometchat-pro/react-native-chat";
+import React, { useEffect, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -9,7 +10,34 @@ import {
 } from "react-native";
 import ChatListItem from "../components/ChatListItem";
 
+const SEARCH_LIMIT = 30;
+
 const ChatsScreen = () => {
+  const [conversationList, setConversationList] = useState<
+    CometChat.Conversation[]
+  >();
+
+  useEffect(() => {
+    fetchAllConversations();
+  }, []);
+
+  const fetchAllConversations = () => {
+    const conversationsRequest = new CometChat.ConversationsRequestBuilder()
+      .setLimit(SEARCH_LIMIT)
+      .setConversationType("user")
+      .build();
+
+    conversationsRequest.fetchNext().then(
+      (userConversationList) => {
+        console.log("Conversations list received");
+        setConversationList(userConversationList);
+      },
+      (error) => {
+        console.log("Conversations list fetching failed with error:", error);
+      }
+    );
+  };
+
   return (
     <SafeAreaView style={{ backgroundColor: "black" }}>
       <KeyboardAvoidingView
@@ -21,7 +49,7 @@ const ChatsScreen = () => {
             <Text style={styles.conversationHeaderTitleStyle}>Chats</Text>
           </View>
         </View>
-        <ChatListItem />
+        <ChatListItem conversationList={conversationList} />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

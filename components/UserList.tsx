@@ -21,11 +21,17 @@ const UserList = ({ users, addFriend }: UserListProps) => {
   const [dataList, setDataList] = useState<CometChat.User[]>();
 
   useEffect(() => {
-    setDataList([...users]);
+    setDataList(users);
   }, [users]);
 
   useEffect(() => {
-    setDataList(users.filter((el) => el.getName().includes(search)));
+    if (users) {
+      setDataList(
+        users.filter((el) =>
+          el.getName().toLowerCase().includes(search.toLowerCase())
+        )
+      );
+    }
   }, [search]);
 
   const updateSearch = (value: string) => {
@@ -57,7 +63,7 @@ const UserList = ({ users, addFriend }: UserListProps) => {
                     title="Add Friend "
                     onPress={() => {
                       addFriend(item);
-                      setSearch("");
+                      // setSearch("");
                     }}
                     iconRight
                     icon={<Icon name="plus-circle" color="white" size={16} />}

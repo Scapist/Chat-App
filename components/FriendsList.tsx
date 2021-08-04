@@ -20,15 +20,17 @@ const FriendsList = ({ users, unfriendUser }: FriendsListProps) => {
   const [dataList, setDataList] = useState<CometChat.User[]>();
 
   useEffect(() => {
-    setDataList([...users]);
+    setDataList(users);
   }, [users]);
 
   useEffect(() => {
-    setDataList(
-      users.filter((el) =>
-        el.getName().toLowerCase().includes(search.toLowerCase())
-      )
-    );
+    if (users) {
+      setDataList(
+        users.filter((el) =>
+          el.getName().toLowerCase().includes(search.toLowerCase())
+        )
+      );
+    }
   }, [search]);
 
   const updateSearch = (value: string) => {
@@ -63,7 +65,7 @@ const FriendsList = ({ users, unfriendUser }: FriendsListProps) => {
                       size={20}
                       onPress={() => {
                         unfriendUser(item);
-                        setSearch("");
+                        // setSearch("");
                       }}
                     />
                   </View>
