@@ -7,21 +7,47 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import BottomOverlay from "./BottomOverlay";
 import ProfilePicture from "./ProfilePicture";
 
 type ChatListItemProps = {
   conversationList: CometChat.Conversation[];
+  deleteConversation: (conversationId: string) => {};
+  openChat: (recipient: CometChat.User) => {};
 };
 
-const ChatListItem = ({ conversationList }: ChatListItemProps) => {
-  useEffect(() => {
-    formatTimestamp(1627541084);
-  }, []);
+const ChatListItem = ({
+  conversationList,
+  deleteConversation,
+  openChat,
+}: ChatListItemProps) => {
+  const [conversationId, setConversationId] = useState("");
+  const [
+    conversationSettingsIsVisible,
+    setConversationSettingsIsVisible,
+  ] = useState(false);
+
+  const conversationSettingsActionList = [
+    {
+      title: "Delete Conversation",
+      onPress: () => {
+        deleteConversation(conversationId);
+        setConversationSettingsIsVisible(false);
+      },
+    },
+    {
+      title: "Cancel",
+      containerStyle: { backgroundColor: "red" },
+      onPress: () => {
+        setConversationSettingsIsVisible(false);
+      },
+    },
+  ];
 
   const formatTimestamp = (timestamp: number) => {
     const date = new Date(timestamp * 1000);
     const today = new Date(Date.now());
-    const one_day = 1000 * 60 * 60 * 24;
+    const oneDay = 1000 * 60 * 60 * 24;
     let formattedTimestamp = "";
 
     if (date.toDateString() === today.toDateString()) {
@@ -35,7 +61,7 @@ const ChatListItem = ({ conversationList }: ChatListItemProps) => {
         (hours < 10 ? "0" + hours : hours) +
         ":" +
         (minutes < 10 ? "0" + minutes : minutes + " " + ampm);
-    } else if ((today.getTime() - date.getTime()) / one_day) {
+    } else if ((today.getTime() - date.getTime()) / oneDay < 6) {
       const days = [
         "Sunday",
         "Monday",
@@ -45,7 +71,7 @@ const ChatListItem = ({ conversationList }: ChatListItemProps) => {
         "Friday",
         "Saturday",
       ];
-      formattedTimestamp = days[today.getDay()];
+      formattedTimestamp = days[date.getDay()];
     } else {
       formattedTimestamp = today.toLocaleDateString("en-US");
     }
@@ -53,13 +79,15 @@ const ChatListItem = ({ conversationList }: ChatListItemProps) => {
     return formattedTimestamp;
   };
 
+  const openConversation = (conversationWith: string) => {};
+
+  const openConversationSettings = (conversationWith: string) => {
+    setConversationId(conversationWith);
+    setConversationSettingsIsVisible(true);
+  };
+
   return (
     <View style={styles.container}>
-      {/* <SearchBar
-        placeholder="Type Here..."
-        onChangeText={updateSearch}
-        value={search}
-      /> */}
       <View style={styles.body}>
         <FlatList
           data={conversationList}
@@ -68,26 +96,37 @@ const ChatListItem = ({ conversationList }: ChatListItemProps) => {
           }}
           renderItem={({ item }) => {
             return (
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  openChat(item.getConversationWith() as CometChat.User);
+                }}
+                onLongPress={() => {
+                  openConversationSettings(
+                    (item.getConversationWith() as CometChat.User).getUid()
+                  );
+                }}
+              >
                 <View style={styles.box}>
                   <ProfilePicture user={item.getConversationWith()} size={50} />
-                  <Text style={styles.username}>
-                    {item.getConversationWith().getName()}
-                  </Text>
-                  <Text
-                    style={styles.lastMessage}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
-                    {item.getLastMessage()["data"]["text"]}
-                  </Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.username}>
+                      {item.getConversationWith().getName()}
+                    </Text>
+                    <Text
+                      style={styles.lastMessage}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {item.getLastMessage().data.text}
+                    </Text>
+                  </View>
                   <Text style={styles.username}>
                     {item.getUnreadMessageCount() === 0
                       ? ""
                       : item.getUnreadMessageCount()}
                   </Text>
                   <Text style={styles.timestamp}>
-                    {formatTimestamp(item.getLastMessage()["sentAt"])}
+                    {formatTimestamp(item.getLastMessage().sentAt)}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -95,6 +134,10 @@ const ChatListItem = ({ conversationList }: ChatListItemProps) => {
           }}
         />
       </View>
+      <BottomOverlay
+        isVisible={conversationSettingsIsVisible}
+        actionList={conversationSettingsActionList}
+      />
     </View>
   );
 };
@@ -112,6 +155,8 @@ const styles = StyleSheet.create({
     marginTop: 5,
     backgroundColor: "black",
     flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
 
     borderColor: "#85089e",
     borderWidth: 2,
@@ -121,6 +166,7 @@ const styles = StyleSheet.create({
     fontFamily: "serif",
     color: "white",
     fontSize: 14,
+
     marginLeft: 10,
   },
   lastMessage: {
@@ -128,11 +174,16 @@ const styles = StyleSheet.create({
     fontFamily: "serif",
     color: "white",
     fontSize: 12,
+
+    marginLeft: 10,
+    marginTop: 5,
+    width: "65%",
   },
   timestamp: {
     fontFamily: "serif",
     color: "white",
     fontSize: 12,
+    paddingRight: 10,
   },
 });
 

@@ -10,9 +10,14 @@ import {
 } from "react-native";
 import ChatListItem from "../components/ChatListItem";
 
+type ChatsScreenProps = {
+  navigation: any;
+  user: CometChat.User;
+};
+
 const SEARCH_LIMIT = 30;
 
-const ChatsScreen = () => {
+const ConversationsScreen = ({ navigation, user }: ChatsScreenProps) => {
   const [conversationList, setConversationList] = useState<
     CometChat.Conversation[]
   >();
@@ -20,6 +25,10 @@ const ChatsScreen = () => {
   useEffect(() => {
     fetchAllConversations();
   }, []);
+
+  const forceUpdate = () => {
+    fetchAllConversations();
+  };
 
   const fetchAllConversations = () => {
     const conversationsRequest = new CometChat.ConversationsRequestBuilder()
@@ -38,6 +47,22 @@ const ChatsScreen = () => {
     );
   };
 
+  const openChat = (recipient: CometChat.User) => {
+    navigation.navigate("ChatScreen", { user, recipient });
+  };
+
+  const deleteConversationForUser = (conversationSettingsId: string) => {
+    CometChat.deleteConversation(conversationSettingsId, "user").then(
+      (deletedConversation) => {
+        console.log(deletedConversation);
+        forceUpdate();
+      },
+      (error) => {
+        console.log("error while deleting a conversation", error);
+      }
+    );
+  };
+
   return (
     <SafeAreaView style={{ backgroundColor: "black" }}>
       <KeyboardAvoidingView
@@ -49,7 +74,11 @@ const ChatsScreen = () => {
             <Text style={styles.conversationHeaderTitleStyle}>Chats</Text>
           </View>
         </View>
-        <ChatListItem conversationList={conversationList} />
+        <ChatListItem
+          conversationList={conversationList}
+          deleteConversation={deleteConversationForUser}
+          openChat={openChat}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -80,4 +109,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChatsScreen;
+export default ConversationsScreen;

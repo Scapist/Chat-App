@@ -2,7 +2,7 @@ import { CometChat } from "@cometchat-pro/react-native-chat";
 import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
-import ChatsScreen from "./ChatsScreen";
+import ConversationsScreen from "./ConversationsScreen";
 import PeopleScreen from "./PeopleScreen";
 import SettingsScreen from "./SettingsScreen";
 
@@ -38,11 +38,14 @@ const HomeScreen = ({ user }: HomeScreenProps) => {
         labelStyle: { fontFamily: "serif" },
       }}
     >
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Chats"
-        component={ChatsScreen}
+        component={ConversationsScreen}
         // options={{ tabBarBadge: 3 }}
-      />
+      /> */}
+      <Tab.Screen name="Chats">
+        {(props) => <ConversationsScreen {...props} user={user} />}
+      </Tab.Screen>
       <Tab.Screen name="People">
         {(props) => <PeopleScreen {...props} user={user} />}
       </Tab.Screen>

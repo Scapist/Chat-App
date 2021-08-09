@@ -13,6 +13,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ModalProvider } from "react-native-use-modal";
 import { COMETCHAT_CONSTANTS } from "./constants";
 import { auth } from "./firebase";
+import ChatScreen from "./screens/ChatScreen";
 import HomeScreen from "./screens/HomeScreen";
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
@@ -113,6 +114,7 @@ export default function App() {
             <Stack.Screen name="Home">
               {(props) => <HomeScreen {...props} user={user} />}
             </Stack.Screen>
+            <Stack.Screen name="ChatScreen" component={ChatScreen} />
           </Stack.Navigator>
         </NavigationContainer>
         <StatusBar style="light" />
