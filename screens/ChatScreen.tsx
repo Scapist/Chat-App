@@ -1,14 +1,13 @@
 import { CometChat } from "@cometchat-pro/react-native-chat";
 import { RouteProp } from "@react-navigation/native";
-import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  DeviceEventEmitter,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -18,7 +17,6 @@ import {
 } from "react-native";
 import { Icon } from "react-native-elements";
 import ProfilePicture from "../components/ProfilePicture";
-import { COMETCHAT_CONSTANTS } from "../constants";
 
 type RootStackParamList = {
   Chat: { user: CometChat.User; recipient: CometChat.User };
@@ -35,6 +33,7 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
   const { user, recipient } = route.params;
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<CometChat.BaseMessage[]>([]);
+  const scrollViewRef = useRef();
 
   useEffect(() => {
     navigation.setOptions({
@@ -77,6 +76,10 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
   });
 
   useEffect(() => {
+    fetchMessages();
+  }, []);
+
+  const fetchMessages = () => {
     if (user && recipient) {
       const UID = recipient.getUid();
       const limit = 50;
@@ -88,7 +91,7 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
 
       messagesRequest.fetchPrevious().then(
         (messagesList) => {
-          // console.log("Message list fetched:", messagesList);
+          console.log("Message list fetched:", messagesList);
           // Handle the list of messages
           setMessages(messagesList);
         },
@@ -97,20 +100,36 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
         }
       );
     }
-  }, []);
+  };
+
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd();
+    }
+  }, [messages]);
 
   const sendMessage = () => {
     // Keyboard.dismiss();
-    // if (input) {
-    //   db.collection("chats").doc(id).collection("messages").add({
-    //     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-    //     message: input,
-    //     displayName: auth.currentUser?.displayName,
-    //     email: auth.currentUser?.email,
-    //     photoUrl: auth.currentUser?.photoURL,
-    //   });
-    //   setInput("");
-    // }
+
+    if (input) {
+      const textMessage = new CometChat.TextMessage(
+        recipient.getUid(),
+        input,
+        CometChat.RECEIVER_TYPE.USER
+      );
+
+      CometChat.sendMessage(textMessage).then(
+        (message) => {
+          // console.log("Message sent successfully:", message);
+          fetchMessages();
+          DeviceEventEmitter.emit("messageSent");
+        },
+        (error) => {
+          console.log("Message sending failed with error:", error);
+        }
+      );
+      setInput("");
+    }
   };
 
   return (
@@ -118,11 +137,14 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
-        keyboardVerticalOffset={90}
+        keyboardVerticalOffset={125}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <>
-            <ScrollView contentContainerStyle={{ paddingTop: 15 }}>
+            <ScrollView
+              ref={scrollViewRef}
+              contentContainerStyle={{ paddingTop: 15 }}
+            >
               {messages.map((message) =>
                 message.getSender().getUid() === user.getUid() ? (
                   <View style={styles.userContainer}>

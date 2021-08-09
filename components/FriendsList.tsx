@@ -13,9 +13,10 @@ import ProfilePicture from "./ProfilePicture";
 type FriendsListProps = {
   users: CometChat.User[];
   unfriendUser: any;
+  openChat: any;
 };
 
-const FriendsList = ({ users, unfriendUser }: FriendsListProps) => {
+const FriendsList = ({ users, unfriendUser, openChat }: FriendsListProps) => {
   const [search, setSearch] = useState<string>("");
   const [dataList, setDataList] = useState<CometChat.User[]>();
 
@@ -52,7 +53,11 @@ const FriendsList = ({ users, unfriendUser }: FriendsListProps) => {
           }}
           renderItem={({ item }) => {
             return (
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  openChat(item);
+                }}
+              >
                 <View style={styles.box}>
                   <ProfilePicture user={item} size={50} />
                   <Text style={styles.username}>{item.getName()}</Text>

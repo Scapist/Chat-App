@@ -1,6 +1,7 @@
 import { CometChat } from "@cometchat-pro/react-native-chat";
 import React, { useEffect, useState } from "react";
 import {
+  DeviceEventEmitter,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -24,6 +25,10 @@ const ConversationsScreen = ({ navigation, user }: ChatsScreenProps) => {
 
   useEffect(() => {
     fetchAllConversations();
+
+    DeviceEventEmitter.addListener("messageSent", () => {
+      forceUpdate();
+    });
   }, []);
 
   const forceUpdate = () => {
@@ -33,7 +38,7 @@ const ConversationsScreen = ({ navigation, user }: ChatsScreenProps) => {
   const fetchAllConversations = () => {
     const conversationsRequest = new CometChat.ConversationsRequestBuilder()
       .setLimit(SEARCH_LIMIT)
-      .setConversationType("user")
+      .setConversationType(CometChat.RECEIVER_TYPE.USER)
       .build();
 
     conversationsRequest.fetchNext().then(
@@ -48,11 +53,17 @@ const ConversationsScreen = ({ navigation, user }: ChatsScreenProps) => {
   };
 
   const openChat = (recipient: CometChat.User) => {
-    navigation.navigate("ChatScreen", { user, recipient });
+    navigation.navigate("ChatScreen", {
+      user,
+      recipient,
+    });
   };
 
   const deleteConversationForUser = (conversationSettingsId: string) => {
-    CometChat.deleteConversation(conversationSettingsId, "user").then(
+    CometChat.deleteConversation(
+      conversationSettingsId,
+      CometChat.RECEIVER_TYPE.USER
+    ).then(
       (deletedConversation) => {
         console.log(deletedConversation);
         forceUpdate();

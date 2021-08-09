@@ -75,11 +75,8 @@ const ChatListItem = ({
     } else {
       formattedTimestamp = today.toLocaleDateString("en-US");
     }
-
     return formattedTimestamp;
   };
-
-  const openConversation = (conversationWith: string) => {};
 
   const openConversationSettings = (conversationWith: string) => {
     setConversationId(conversationWith);
@@ -120,11 +117,11 @@ const ChatListItem = ({
                       {item.getLastMessage().data.text}
                     </Text>
                   </View>
-                  <Text style={styles.username}>
+                  {/* <Text style={styles.username}>
                     {item.getUnreadMessageCount() === 0
                       ? ""
                       : item.getUnreadMessageCount()}
-                  </Text>
+                  </Text> */}
                   <Text style={styles.timestamp}>
                     {formatTimestamp(item.getLastMessage().sentAt)}
                   </Text>

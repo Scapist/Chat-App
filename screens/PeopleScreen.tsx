@@ -2,6 +2,7 @@ import { CometChat } from "@cometchat-pro/react-native-chat";
 import { Ionicons } from "@expo/vector-icons";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import React, { useEffect, useState } from "react";
+import { DeviceEventEmitter } from "react-native";
 import AddFriendsScreen from "./AddFriendsScreen";
 import FriendsScreen from "./FriendsScreen";
 
@@ -20,6 +21,10 @@ const PeopleScreen = ({ user }: PeopleScreenProps) => {
 
   useEffect(() => {
     fetchAllUsers();
+
+    DeviceEventEmitter.addListener("friendChange", () => {
+      forceUpdate();
+    });
   }, []);
 
   const forceUpdate = () => {
@@ -109,12 +114,7 @@ const PeopleScreen = ({ user }: PeopleScreenProps) => {
     >
       <Tab.Screen name="Friends" options={{ tabBarLabel: "Friends" }}>
         {(props) => (
-          <FriendsScreen
-            {...props}
-            user={user}
-            friendsList={friendsList}
-            forceUpdate={forceUpdate}
-          />
+          <FriendsScreen {...props} user={user} friendsList={friendsList} />
         )}
       </Tab.Screen>
       <Tab.Screen name="AddFriends" options={{ tabBarLabel: "Add Friends" }}>
@@ -123,7 +123,6 @@ const PeopleScreen = ({ user }: PeopleScreenProps) => {
             {...props}
             user={user}
             nonFriendsList={nonFriendsList}
-            forceUpdate={forceUpdate}
           />
         )}
       </Tab.Screen>

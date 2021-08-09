@@ -1,7 +1,7 @@
 import { CometChat } from "@cometchat-pro/react-native-chat";
 import axios from "axios";
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { DeviceEventEmitter, StyleSheet, View } from "react-native";
 import FriendsList from "../components/FriendsList";
 import { COMETCHAT_CONSTANTS } from "../constants";
 
@@ -9,13 +9,12 @@ type FriendsScreenProps = {
   navigation: any;
   user: CometChat.User;
   friendsList: CometChat.User[];
-  forceUpdate: any;
 };
 
 const FriendsScreen = ({
+  navigation,
   user,
   friendsList,
-  forceUpdate,
 }: FriendsScreenProps) => {
   const unfriendUser = (friend: CometChat.User) => {
     if (user) {
@@ -27,7 +26,7 @@ const FriendsScreen = ({
 
       axios.delete(url, { data: { friends: [friend.getUid()] }, headers }).then(
         (response) => {
-          forceUpdate();
+          DeviceEventEmitter.emit("friendChange");
         },
         (error) => {
           console.log(error);
@@ -36,9 +35,20 @@ const FriendsScreen = ({
     }
   };
 
+  const openChat = (recipient: CometChat.User) => {
+    navigation.navigate("ChatScreen", {
+      user,
+      recipient,
+    });
+  };
+
   return (
     <View style={styles.container}>
-      <FriendsList users={friendsList} unfriendUser={unfriendUser} />
+      <FriendsList
+        users={friendsList}
+        unfriendUser={unfriendUser}
+        openChat={openChat}
+      />
     </View>
   );
 };

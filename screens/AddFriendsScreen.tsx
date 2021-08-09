@@ -1,7 +1,7 @@
 import { CometChat } from "@cometchat-pro/react-native-chat";
 import axios from "axios";
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { DeviceEventEmitter, StyleSheet, View } from "react-native";
 import UserList from "../components/UserList";
 import { COMETCHAT_CONSTANTS } from "../constants";
 
@@ -9,14 +9,9 @@ type UsersScreenProps = {
   navigation: any;
   user: CometChat.User;
   nonFriendsList: CometChat.User[];
-  forceUpdate: any;
 };
 
-const UsersScreen = ({
-  user,
-  nonFriendsList,
-  forceUpdate,
-}: UsersScreenProps) => {
+const UsersScreen = ({ user, nonFriendsList }: UsersScreenProps) => {
   const addFriend = (friend: CometChat.User) => {
     if (user) {
       const url = `https://api-us.cometchat.io/v2.0/users/${user.getUid()}/friends`;
@@ -27,7 +22,7 @@ const UsersScreen = ({
 
       axios.post(url, { accepted: [friend.getUid()] }, { headers }).then(
         (response) => {
-          forceUpdate();
+          DeviceEventEmitter.emit("friendChange");
         },
         (error) => {
           console.log(error);
