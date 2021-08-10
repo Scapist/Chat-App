@@ -9,6 +9,7 @@ import {
   Text,
   View,
 } from "react-native";
+import uuid from "react-native-uuid";
 import ChatListItem from "../components/ChatListItem";
 
 type ChatsScreenProps = {
@@ -24,9 +25,10 @@ const ConversationsScreen = ({ navigation, user }: ChatsScreenProps) => {
   >();
 
   useEffect(() => {
+    listenForMessages();
     fetchAllConversations();
 
-    DeviceEventEmitter.addListener("messageSent", () => {
+    DeviceEventEmitter.addListener("updateConversationList", () => {
       forceUpdate();
     });
   }, []);
@@ -49,6 +51,25 @@ const ConversationsScreen = ({ navigation, user }: ChatsScreenProps) => {
       (error) => {
         console.log("Conversations list fetching failed with error:", error);
       }
+    );
+  };
+
+  const listenForMessages = () => {
+    const listenerID = uuid.v4().toString();
+
+    CometChat.addMessageListener(
+      listenerID,
+      new CometChat.MessageListener({
+        onTextMessageReceived: (textMessage: CometChat.BaseMessage) => {
+          console.log("Text message received successfully");
+          // Handle text message
+          fetchAllConversations();
+        },
+        // onMediaMessageReceived: (mediaMessage: any) => {
+        //   console.log("Media message received successfully", mediaMessage);
+        //   // Handle media message
+        // },
+      })
     );
   };
 

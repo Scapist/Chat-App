@@ -16,6 +16,7 @@ import {
   View,
 } from "react-native";
 import { Icon } from "react-native-elements";
+import uuid from "react-native-uuid";
 import ProfilePicture from "../components/ProfilePicture";
 
 type RootStackParamList = {
@@ -33,7 +34,16 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
   const { user, recipient } = route.params;
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<CometChat.BaseMessage[]>([]);
+  const [recipientIsTyping, setRecipientIsTyping] = useState(false);
   const scrollViewRef = useRef();
+
+  const receiverId = recipient.getUid();
+  const receiverType = CometChat.RECEIVER_TYPE.USER;
+
+  const typingNotification = new CometChat.TypingIndicator(
+    receiverId,
+    receiverType
+  );
 
   useEffect(() => {
     navigation.setOptions({
@@ -76,8 +86,47 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
   });
 
   useEffect(() => {
+    listenForMessages();
+    listenForTypingIndicator();
     fetchMessages();
   }, []);
+
+  const listenForMessages = () => {
+    const listenerID = uuid.v4().toString();
+
+    CometChat.addMessageListener(
+      listenerID,
+      new CometChat.MessageListener({
+        onTextMessageReceived: (textMessage: CometChat.BaseMessage) => {
+          console.log("Text message received successfully");
+          // Handle text message
+          fetchMessages();
+        },
+        // onMediaMessageReceived: (mediaMessage: any) => {
+        //   console.log("Media message received successfully", mediaMessage);
+        //   // Handle media message
+        // },
+      })
+    );
+  };
+
+  const listenForTypingIndicator = () => {
+    const listenerID = uuid.v4().toString();
+
+    CometChat.addMessageListener(
+      listenerID,
+      new CometChat.MessageListener({
+        onTypingStarted: (typingIndicator: any) => {
+          setRecipientIsTyping(true);
+          console.log("Typing started :", typingIndicator);
+        },
+        onTypingEnded: (typingIndicator: any) => {
+          setRecipientIsTyping(false);
+          console.log("Typing ended :", typingIndicator);
+        },
+      })
+    );
+  };
 
   const fetchMessages = () => {
     if (user && recipient) {
@@ -91,7 +140,7 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
 
       messagesRequest.fetchPrevious().then(
         (messagesList) => {
-          console.log("Message list fetched:", messagesList);
+          // console.log("Message list fetched:", messagesList);
           // Handle the list of messages
           setMessages(messagesList);
         },
@@ -122,7 +171,7 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
         (message) => {
           // console.log("Message sent successfully:", message);
           fetchMessages();
-          DeviceEventEmitter.emit("messageSent");
+          DeviceEventEmitter.emit("updateConversationList");
         },
         (error) => {
           console.log("Message sending failed with error:", error);
@@ -147,9 +196,8 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
             >
               {messages.map((message) =>
                 message.getSender().getUid() === user.getUid() ? (
-                  <View style={styles.userContainer}>
+                  <View key={message.getId()} style={styles.userContainer}>
                     <View
-                      key={message.getId()}
                       style={[
                         styles.messageContainer,
                         { backgroundColor: "#3d3d3b", alignSelf: "flex-end" },
@@ -162,10 +210,9 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
                     <ProfilePicture user={user} size={20} />
                   </View>
                 ) : (
-                  <View style={styles.recipientContainer}>
+                  <View key={message.getId()} style={styles.recipientContainer}>
                     <ProfilePicture user={recipient} size={20} />
                     <View
-                      key={message.getId()}
                       style={[
                         styles.messageContainer,
                         { backgroundColor: "black", alignSelf: "flex-start" },
@@ -179,13 +226,26 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
                 )
               )}
             </ScrollView>
+            {recipientIsTyping && (
+              <View style={{ paddingLeft: 20 }}>
+                <Text style={{ color: "white" }}>
+                  {recipient.getName()} is typing...
+                </Text>
+              </View>
+            )}
             <View style={styles.footer}>
               <TextInput
                 style={styles.textInput}
                 placeholder="Aa"
                 value={input}
-                onChangeText={setInput}
                 onSubmitEditing={sendMessage}
+                onChangeText={(text) => {
+                  setInput(text);
+                  CometChat.startTyping(typingNotification);
+                }}
+                onEndEditing={() => {
+                  CometChat.endTyping(typingNotification);
+                }}
               />
               <TouchableOpacity activeOpacity={0.5} onPress={sendMessage}>
                 <Icon name="paper-plane" type="font-awesome" color="white" />
