@@ -1,4 +1,5 @@
 import { CometChat } from "@cometchat-pro/react-native-chat";
+import messaging from "@react-native-firebase/messaging";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import React, { useEffect, useState } from "react";
@@ -12,7 +13,7 @@ import "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ModalProvider } from "react-native-use-modal";
 import { COMETCHAT_CONSTANTS } from "./constants";
-import { auth } from "./firebase";
+import { auth, firestore } from "./firebase";
 import ChatScreen from "./screens/ChatScreen";
 import HomeScreen from "./screens/HomeScreen";
 import LoginScreen from "./screens/LoginScreen";
@@ -37,18 +38,65 @@ export default function App() {
     .setRegion(COMETCHAT_CONSTANTS.APP_REGION)
     .build();
 
-  useEffect(() => {
-    CometChat.init(COMETCHAT_CONSTANTS.APP_ID, appSetting).then(
-      () => {
-        console.log("Initialization completed successfully");
-        // You can now call login function.
-      },
-      (error) => {
-        console.log("Initialization failed with error:", error);
-        // Check the reason for error and take appropriate action.
-      }
-    );
+  const saveTokenToDatabase = async (token: string) => {
+    if (auth.currentUser) {
+      const userId = auth.currentUser.uid;
 
+      // Add the token to the users datastore
+      await firestore()
+        .collection("users")
+        .doc(userId)
+        .update({
+          tokens: firestore.FieldValue.arrayUnion(token),
+        });
+    }
+  };
+
+  useEffect(() => {
+    const initializeCometChat = async () => {
+      try {
+        // First initialize the app
+        await CometChat.init(COMETCHAT_CONSTANTS.APP_ID, appSetting);
+
+        // Login the user
+        if (auth.currentUser) {
+          // console.log("app login", auth.currentUser?.uid);
+          // await CometChat.login(
+          //   auth.currentUser?.uid,
+          //   COMETCHAT_CONSTANTS.AUTH_KEY
+          // );
+
+          // Get the FCM device token
+          const FCM_TOKEN = "";
+          await messaging()
+            .getToken()
+            .then((token) => {
+              console.log("save token");
+              return saveTokenToDatabase(token);
+            })
+            .catch((err) => {
+              console.log("error", err);
+            });
+
+          saveTokenToDatabase(FCM_TOKEN);
+
+          // Register the token with Enhanced Push Notifications extension
+          await CometChat.registerTokenForPushNotification(FCM_TOKEN);
+
+          return messaging().onTokenRefresh((token) => {
+            saveTokenToDatabase(token);
+          });
+        }
+      } catch (error) {
+        // Handle errors gracefully
+        console.log("error", error);
+      }
+    };
+
+    initializeCometChat();
+  }, []);
+
+  useEffect(() => {
     const getPermissions = async () => {
       if (Platform.OS === "android") {
         let granted = await PermissionsAndroid.requestMultiple([
@@ -65,7 +113,6 @@ export default function App() {
         }
       }
     };
-
     getPermissions();
   }, []);
 

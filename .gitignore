@@ -75,3 +75,4 @@ web-build/
 
 constants.js
 firebase.ts
+android/app/google-services.json

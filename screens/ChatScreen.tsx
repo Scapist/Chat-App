@@ -34,6 +34,7 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<CometChat.BaseMessage[]>([]);
   const [recipientIsTyping, setRecipientIsTyping] = useState(false);
+  const [messagesRead, setMessagesRead] = useState(false);
   const scrollViewRef = useRef();
 
   const receiverId = recipient.getUid();
@@ -87,6 +88,7 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
   useEffect(() => {
     listenForMessages();
     listenForTypingIndicator();
+    listenForDeliveryReadReceipt();
     fetchMessages();
   }, [navigation]);
 
@@ -135,6 +137,22 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
         },
       })
     );
+  };
+
+  const listenForDeliveryReadReceipt = () => {
+    // let listenerId = uuid.v4().toString();
+    // CometChat.addMessageListener(
+    //   listenerId,
+    //   new CometChat.MessageListener({
+    //     onMessagesDelivered: (messageReceipt: CometChat.MessageReceipt) => {
+    //       console.log("MessageDeliverd");
+    //     },
+    //     onMessagesRead: (messageReceipt: CometChat.MessageReceipt) => {
+    //       console.log("MessageRead");
+    //       console.log("dsf");
+    //     },
+    //   })
+    // );
   };
 
   const fetchMessages = () => {

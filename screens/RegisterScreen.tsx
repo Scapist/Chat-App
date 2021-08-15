@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Button, Icon, Image } from "react-native-elements";
 import { COMETCHAT_CONSTANTS } from "../constants";
-import { auth } from "../firebase";
+import { auth, firestore } from "../firebase";
 
 type RegisterScreenProps = {
   navigation: any;
@@ -31,6 +31,9 @@ const RegisterScreen = ({
       .then((userCredential) => {
         const user = userCredential.user;
         if (user) {
+          // Add the token to the users datastore
+          firestore().collection("users").doc(user.uid).set({});
+
           user.updateProfile({
             displayName: username,
           });

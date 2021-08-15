@@ -85,10 +85,6 @@ const ChatListItem = ({
     setConversationSettingsIsVisible(true);
   };
 
-  useEffect(() => {
-    console.log("Refreshed!");
-  }, [navigation]);
-
   return (
     <View style={styles.container}>
       <View style={styles.body}>
