@@ -1,7 +1,6 @@
 import { CometChat } from "@cometchat-pro/react-native-chat";
 import React, { useEffect, useState } from "react";
 import {
-  DeviceEventEmitter,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -27,11 +26,14 @@ const ConversationsScreen = ({ navigation, user }: ChatsScreenProps) => {
   useEffect(() => {
     listenForMessages();
     fetchAllConversations();
-
-    DeviceEventEmitter.addListener("updateConversationList", () => {
-      forceUpdate();
-    });
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      fetchAllConversations();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const forceUpdate = () => {
     fetchAllConversations();

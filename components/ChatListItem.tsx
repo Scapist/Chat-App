@@ -11,12 +11,14 @@ import BottomOverlay from "./BottomOverlay";
 import ProfilePicture from "./ProfilePicture";
 
 type ChatListItemProps = {
+  navigation: any;
   conversationList: CometChat.Conversation[];
   deleteConversation: (conversationId: string) => {};
   openChat: (recipient: CometChat.User) => {};
 };
 
 const ChatListItem = ({
+  navigation,
   conversationList,
   deleteConversation,
   openChat,
@@ -83,6 +85,10 @@ const ChatListItem = ({
     setConversationSettingsIsVisible(true);
   };
 
+  useEffect(() => {
+    console.log("Refreshed!");
+  }, [navigation]);
+
   return (
     <View style={styles.container}>
       <View style={styles.body}>
@@ -114,17 +120,23 @@ const ChatListItem = ({
                       numberOfLines={1}
                       ellipsizeMode="tail"
                     >
+                      {item.getLastMessage().data.entities.sender.entity.name}
+                      {": "}
                       {item.getLastMessage().data.text}
                     </Text>
                   </View>
-                  {/* <Text style={styles.username}>
-                    {item.getUnreadMessageCount() === 0
-                      ? ""
-                      : item.getUnreadMessageCount()}
-                  </Text> */}
-                  <Text style={styles.timestamp}>
-                    {formatTimestamp(item.getLastMessage().sentAt)}
-                  </Text>
+                  <View style={styles.itemRight}>
+                    {item.getUnreadMessageCount() !== 0 && (
+                      <View style={styles.unreadMessageContainer}>
+                        <Text style={styles.unreadMessageCount}>
+                          {item.getUnreadMessageCount()}
+                        </Text>
+                      </View>
+                    )}
+                    <Text style={styles.timestamp}>
+                      {formatTimestamp(item.getLastMessage().sentAt)}
+                    </Text>
+                  </View>
                 </View>
               </TouchableOpacity>
             );
@@ -181,6 +193,23 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 12,
     paddingRight: 10,
+  },
+  itemRight: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  unreadMessageContainer: {
+    width: 15,
+    height: 15,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#85089e",
+    borderRadius: 15 / 2,
+  },
+  unreadMessageCount: {
+    fontFamily: "serif",
+    color: "white",
+    fontSize: 12,
   },
 });
 

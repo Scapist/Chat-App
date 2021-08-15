@@ -2,7 +2,6 @@ import { CometChat } from "@cometchat-pro/react-native-chat";
 import { RouteProp } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  DeviceEventEmitter,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -83,13 +82,23 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
         </View>
       ),
     });
-  });
+  }, []);
 
   useEffect(() => {
     listenForMessages();
     listenForTypingIndicator();
     fetchMessages();
-  }, []);
+  }, [navigation]);
+
+  useEffect(() => {
+    messages.forEach((message) => {
+      CometChat.markAsRead(
+        message.getId().toString(),
+        receiverId,
+        receiverType
+      );
+    });
+  }, [messages]);
 
   const listenForMessages = () => {
     const listenerID = uuid.v4().toString();
@@ -118,11 +127,11 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
       new CometChat.MessageListener({
         onTypingStarted: (typingIndicator: any) => {
           setRecipientIsTyping(true);
-          console.log("Typing started :", typingIndicator);
+          console.log("Typing started");
         },
         onTypingEnded: (typingIndicator: any) => {
           setRecipientIsTyping(false);
-          console.log("Typing ended :", typingIndicator);
+          console.log("Typing ended");
         },
       })
     );
@@ -140,7 +149,7 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
 
       messagesRequest.fetchPrevious().then(
         (messagesList) => {
-          // console.log("Message list fetched:", messagesList);
+          console.log("Message list fetched");
           // Handle the list of messages
           setMessages(messagesList);
         },
@@ -171,7 +180,6 @@ const ChatScreen = ({ route, navigation }: ChatScreenProps) => {
         (message) => {
           // console.log("Message sent successfully:", message);
           fetchMessages();
-          DeviceEventEmitter.emit("updateConversationList");
         },
         (error) => {
           console.log("Message sending failed with error:", error);

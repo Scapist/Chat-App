@@ -1,7 +1,8 @@
 import { CometChat } from "@cometchat-pro/react-native-chat";
 import { Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import uuid from "react-native-uuid";
 import ConversationsScreen from "./ConversationsScreen";
 import PeopleScreen from "./PeopleScreen";
 import SettingsScreen from "./SettingsScreen";
@@ -13,7 +14,56 @@ type HomeScreenProps = {
 
 const Tab = createBottomTabNavigator();
 
-const HomeScreen = ({ user }: HomeScreenProps) => {
+const HomeScreen = ({ navigation, user }: HomeScreenProps) => {
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+
+  useEffect(() => {
+    getUnreadMessageCount();
+    listenForMessages();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      getUnreadMessageCount();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  const listenForMessages = () => {
+    const listenerID = uuid.v4().toString();
+
+    CometChat.addMessageListener(
+      listenerID,
+      new CometChat.MessageListener({
+        onTextMessageReceived: (textMessage: CometChat.BaseMessage) => {
+          getUnreadMessageCount();
+        },
+        // onMediaMessageReceived: (mediaMessage: any) => {
+        //   console.log("Media message received successfully", mediaMessage);
+        //   // Handle media message
+        // },
+      })
+    );
+  };
+
+  const getUnreadMessageCount = () => {
+    CometChat.getUnreadMessageCountForAllUsers().then(
+      (counts) => {
+        console.log("Message count fetched");
+        let count = 0;
+        for (const [, value] of Object.entries(counts)) {
+          count += value;
+        }
+
+        setUnreadMessageCount(count);
+      },
+      (error) => {
+        console.log("Error in getting message count", error);
+      }
+    );
+    return unreadMessageCount;
+  };
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -38,14 +88,21 @@ const HomeScreen = ({ user }: HomeScreenProps) => {
         labelStyle: { fontFamily: "serif" },
       }}
     >
-      {/* <Tab.Screen
-        name="Chats"
-        component={ConversationsScreen}
-        // options={{ tabBarBadge: 3 }}
-      /> */}
-      <Tab.Screen name="Chats">
-        {(props) => <ConversationsScreen {...props} user={user} />}
-      </Tab.Screen>
+      {unreadMessageCount ? (
+        <Tab.Screen
+          name="Chats"
+          options={{
+            tabBarBadge: unreadMessageCount,
+            tabBarBadgeStyle: { backgroundColor: "#85089e" },
+          }}
+        >
+          {(props) => <ConversationsScreen {...props} user={user} />}
+        </Tab.Screen>
+      ) : (
+        <Tab.Screen name="Chats">
+          {(props) => <ConversationsScreen {...props} user={user} />}
+        </Tab.Screen>
+      )}
       <Tab.Screen name="People">
         {(props) => <PeopleScreen {...props} user={user} />}
       </Tab.Screen>
